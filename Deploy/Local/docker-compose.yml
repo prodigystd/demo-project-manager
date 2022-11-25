@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  php-fpm:
+    container_name: demo_task_manager_php
+    build: php-fpm
+    ports:
+      - "9000:9000"
+    volumes:
+      - ../.././:/var/www/html/
+    links:
+      - db
+    networks:
+      - internal
+  nginx:
+    container_name: demo_task_manager_nginx
+    build: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ../.././:/var/www/html/
+    links:
+      - db
+      - php-fpm
+    networks:
+      - internal
+  db:
+    container_name: demo_task_manager_db
+    ports:
+      - "3306:3306"
+    image: mysql:8
+    restart: always
+    volumes:
+      - ../.././:/var/www/html/
+#      - ./../dump.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_DATABASE: demo_task_manager_db
+      MYSQL_USER: demo_task_manager_user
+      MYSQL_PASSWORD: demo_task_manager_pass
+      MYSQL_ROOT_PASSWORD: demo_task_manager_root_pass
+    networks:
+      - internal
+networks:
+  internal:
+    driver: bridge
